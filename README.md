@@ -48,7 +48,7 @@ Custom weights are normalised automatically so they sum to 1. Custom thresholds 
 
 ```mermaid
 flowchart LR
-    A[synthetic_cibil_scores.csv] --> B[Parse CSV<br/>skip malformed rows]
+    A[synthetic_cibil_scores.csv] --> B[Parse CSV<br/>quoted fields supported,<br/>skip malformed rows]
     B --> C[Normalise each<br/>feature to 0–100]
     C --> D[Weighted composite<br/>score 0–100]
     D --> E{Thresholds}
@@ -101,7 +101,7 @@ java CreditRiskAnalyzer --input synthetic_cibil_scores.csv --output credit_risk_
 | `--output <file>` | Output CSV | `credit_risk_report.csv` |
 | `--top <N>` | Print the N highest-risk applicants | `10` |
 | `--weights w1,...,w6` | Order: CIBIL, Payment, CreditUtil, CreditAge, DTI, HardInq (normalised) | `0.40,0.20,0.15,0.10,0.08,0.07` |
-| `--thresholds med,low` | Composite cut-offs for MEDIUM and LOW risk | `50,70` |
+| `--thresholds med,low` | Composite cut-offs for MEDIUM and LOW risk, in that order (medium must be below low) | `50,70` |
 | `-h`, `--help` | Show usage | |
 
 ### Output
@@ -123,7 +123,7 @@ Average composite score: **55.75**.
 
 ## Limitations
 
-- The CSV reader splits naively on commas. Pre-process the data, or improve the parser, if fields contain commas.
+- The CSV reader handles quoted fields (commas, `""` escapes and line breaks inside quotes), but numbers must be plain: a value like `"1,000"` is skipped as malformed.
 - Tune the weights and thresholds for your own use case. The defaults are heuristic, not fitted to default outcomes.
 
 ## Author
