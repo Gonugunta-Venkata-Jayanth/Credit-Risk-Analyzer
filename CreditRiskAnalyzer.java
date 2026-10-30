@@ -12,6 +12,7 @@ Features added:
 import java.io.*;
 import java.nio.file.*;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.stream.*;
 
@@ -35,7 +36,7 @@ public class CreditRiskAnalyzer {
         Applicant(int id) { this.id = id; }
 
         String toCsvRow() {
-            DecimalFormat df = new DecimalFormat("#.##");
+            DecimalFormat df = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.ROOT));
             return String.join(",",
                 String.valueOf(id),
                 df.format(paymentHistory),
