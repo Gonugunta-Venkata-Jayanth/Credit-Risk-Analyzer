@@ -1,11 +1,12 @@
 /*
 Enhanced CreditRiskAnalyzer.java
 Features added:
- - CLI flags: --input <file>, --output <file>, --top <N>, --weights w1,w2,..., --thresholds low,med
+ - CLI flags: --input <file>, --output <file>, --top <N>, --weights w1,w2,..., --thresholds med,low
  - Weights can override default weights (order: CIBIL,Payment,CreditUtil,CreditAge,DTI,HardInq)
- - Thresholds override risk mapping (two numbers: medium_threshold, low_threshold)
+ - Thresholds override risk mapping (two numbers, in this order: medium_threshold,low_threshold,
+   e.g. --thresholds 50,70 means >=70 LOW, >=50 MEDIUM, otherwise HIGH)
  - Writes output CSV and prints top-N risky applicants and summary
- - Usage examples in README below
+ - Usage examples in README.md
 */
 
 import java.io.*;
