@@ -194,7 +194,20 @@ public class CreditRiskAnalyzer {
             int row = 0;
             while ((line = br.readLine()) != null) {
                 row++;
-                String[] cols = line.split(","); // naive split - assumes no commas in fields
+                if (line.trim().isEmpty()) continue;
+                List<String> fields = parseCsvLine(line);
+                // A quoted field may span several physical lines; keep reading until quotes balance
+                while (fields == null) {
+                    String next = br.readLine();
+                    if (next == null) break;
+                    line = line + "\n" + next;
+                    fields = parseCsvLine(line);
+                }
+                if (fields == null) {
+                    System.err.println("Skipping line #" + row + " with an unterminated quoted field");
+                    continue;
+                }
+                String[] cols = fields.toArray(new String[0]);
                 if (cols.length < 7) {
                     // try to be tolerant for whitespace
                     System.err.println("Skipping malformed line #" + row + ": " + line);
@@ -220,6 +233,42 @@ public class CreditRiskAnalyzer {
         }
         System.out.println("Loaded " + list.size() + " applicants from " + path);
         return list;
+    }
+
+    /**
+     * Splits one CSV record (RFC 4180 style): fields may be wrapped in double quotes,
+     * quoted fields may contain commas or line breaks, and "" inside quotes is a literal quote.
+     * Returns null if the record ends inside an open quoted field.
+     */
+    static List<String> parseCsvLine(String line) {
+        List<String> fields = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        boolean inQuotes = false;
+        for (int i = 0; i < line.length(); i++) {
+            char ch = line.charAt(i);
+            if (inQuotes) {
+                if (ch == '"') {
+                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                        cur.append('"');
+                        i++;
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    cur.append(ch);
+                }
+            } else if (ch == '"') {
+                inQuotes = true;
+            } else if (ch == ',') {
+                fields.add(cur.toString());
+                cur.setLength(0);
+            } else {
+                cur.append(ch);
+            }
+        }
+        if (inQuotes) return null;
+        fields.add(cur.toString());
+        return fields;
     }
 
     static double parseDoubleSafe(String s) {
